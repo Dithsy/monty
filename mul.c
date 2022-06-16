@@ -1,28 +1,59 @@
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
 #include "monty.h"
 
-/**
- * _mul - divides the next top value by the top value
- * @stack: stack given by main
- * @line_cnt: line counter
- *
- * Return: void
- */
-void _mul(stack_t **stack, unsigned int line_cnt)
-{
-	int result;
+void monty_nop(stack_t **stack, unsigned int line_number);
+void monty_pchar(stack_t **stack, unsigned int line_number);
+void monty_pstr(stack_t **stack, unsigned int line_number);
 
-	if (!stack || !*stack || !((*stack)->next))
+/**
+ * monty_nop - Does absolutely nothing for the Monty opcode 'nop'.
+ * @stack: A pointer to the top mode node of a stack_t linked list.
+ * @line_number: The current working line number of a Monty bytecodes file.
+ */
+void monty_nop(stack_t **stack, unsigned int line_number)
+{
+	(void)stack;
+	(void)line_number;
+}
+
+/**
+ * monty_pchar - Prints the character in the top value
+ *               node of a stack_t linked list.
+ * @stack: A pointer to the top mode node of a stack_t linked list.
+ * @line_number: The current working line number of a Monty bytecodes file.
+ */
+void monty_pchar(stack_t **stack, unsigned int line_number)
+{
+	if ((*stack)->next == NULL)
 	{
-		fprintf(stderr, "L%d: can't mul, stack too short\n", line_cnt);
-		status = EXIT_FAILURE;
+		set_op_tok_error(pchar_error(line_number, "stack empty"));
+		return;
+	}
+	if ((*stack)->next->n < 0 || (*stack)->next->n > 127)
+	{
+		set_op_tok_error(pchar_error(line_number,
+					     "value out of range"));
 		return;
 	}
 
-	result = ((*stack)->next->n) * ((*stack)->n);
-	pop(stack, line_cnt);/*For top node*/
-	(*stack)->n = result;
+	printf("%c\n", (*stack)->next->n);
+}
+
+/**
+ * monty_pstr - Prints the string contained in a stack_t linked list.
+ * @stack: A pointer to the top mode node of a stack_t linked list.
+ * @line_number: The current working line number of a Monty bytecodes file.
+ */
+void monty_pstr(stack_t **stack, unsigned int line_number)
+{
+	stack_t *tmp = (*stack)->next;
+
+	while (tmp && tmp->n != 0 && (tmp->n > 0 && tmp->n <= 127))
+	{
+		printf("%c", tmp->n);
+		tmp = tmp->next;
+	}
+
+	printf("\n");
+
+	(void)line_number;
 }
